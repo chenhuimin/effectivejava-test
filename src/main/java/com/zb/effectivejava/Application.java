@@ -25,6 +25,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.Header;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -37,6 +38,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandler;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
+
 @SpringBootApplication
 public class Application {
 
@@ -45,6 +52,17 @@ public class Application {
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
+  }
+
+  @Bean
+  public Client getJerseyClient() {
+    ClientConfig cc = new DefaultClientConfig();
+    cc.getProperties().put(ClientConfig.PROPERTY_CONNECT_TIMEOUT, 10 * 1000);
+    cc.getProperties().put(ClientConfig.PROPERTY_READ_TIMEOUT, 10 * 1000);
+    ClientHandler apacheHttpClient4Handler = new ApacheHttpClient4Handler(getHttpClient(), new BasicCookieStore(), true);
+    Client client = new Client(apacheHttpClient4Handler, cc);
+    return client;
+
   }
 
   @Bean
